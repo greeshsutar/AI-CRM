@@ -1,0 +1,21 @@
+// Prisma schema for MINSTOCS CRM
+// Location: apps/api/prisma/schema.prisma (authoritative, single source of truth)
+//
+// PHASE 1 NOTE:
+// This schema contains only the minimum technically required structure.
+// No CRM business models (contacts, companies, deals, etc.) are defined.
+// Business models will be added in their respective implementation phases.
+//
+// DATABASE STATUS:
+// BLOCKED — Supabase project/credentials not yet confirmed by project owner.
+// The DATABASE_URL must be configured before migrations can be run.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
