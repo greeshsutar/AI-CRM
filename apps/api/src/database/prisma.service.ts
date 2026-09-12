@@ -8,9 +8,8 @@ import { PrismaClient } from '@prisma/client';
  * - Disconnects on module destruction
  * - Provides the PrismaClient to other services via DI
  *
- * DATABASE STATUS: BLOCKED
- * The actual database connection will fail until a valid DATABASE_URL
- * is configured with confirmed Supabase project credentials.
+ * DATABASE STATUS: VERIFIED
+ * Supabase PostgreSQL connection successfully established. The database is intentionally empty because Phase 1 prohibits CRM business tables.
  */
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {

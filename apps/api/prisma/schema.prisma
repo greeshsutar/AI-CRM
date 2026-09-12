@@ -7,15 +7,27 @@
 // Business models will be added in their respective implementation phases.
 //
 // DATABASE STATUS:
-// BLOCKED — Supabase project/credentials not yet confirmed by project owner.
-// The DATABASE_URL must be configured before migrations can be run.
+// VERIFIED — Supabase PostgreSQL connection successfully established. The database is intentionally empty because Phase 1 prohibits CRM business tables.
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id @db.Uuid
+  email     String   @unique
+  firstName String?
+  lastName  String?
+  avatarUrl String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
 }

@@ -15,6 +15,23 @@ export interface HealthCheckResponse {
   environment: string;
 }
 
+export interface UserProfile {
+  id: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  avatarUrl: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpdateUserProfilePayload {
+  firstName?: string;
+  lastName?: string;
+  avatarUrl?: string;
+}
+
 export class ApiError extends Error {
   constructor(
     public statusCode: number,
@@ -45,3 +62,50 @@ export async function fetchHealth(): Promise<HealthCheckResponse> {
 
   return response.json();
 }
+
+export async function fetchUserProfile(accessToken: string): Promise<UserProfile> {
+  const response = await fetch(`${API_BASE_URL}/users/me`, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new ApiError(
+      response.status,
+      `Failed to fetch user profile: ${response.statusText}`,
+      errorText,
+    );
+  }
+
+  return response.json();
+}
+
+export async function updateUserProfile(
+  accessToken: string,
+  data: UpdateUserProfilePayload,
+): Promise<UserProfile> {
+  const response = await fetch(`${API_BASE_URL}/users/me`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new ApiError(
+      response.status,
+      `Failed to update user profile: ${response.statusText}`,
+      errorText,
+    );
+  }
+
+  return response.json();
+}
+

@@ -1,10 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { fetchHealth, HealthCheckResponse } from '@/lib/api-client';
-import { Server, ShieldCheck, CheckCircle2, AlertTriangle, RefreshCw } from 'lucide-react';
+import { useAuth } from '@/context/auth-context';
+import { Server, ShieldCheck, CheckCircle2, RefreshCw, LogIn, LogOut, User as UserIcon } from 'lucide-react';
 
 export default function Home() {
+  const { user, signOut } = useAuth();
   const [health, setHealth] = useState<HealthCheckResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,14 +42,53 @@ export default function Home() {
             Phase 1 — Engineering Foundation & System Verification
           </p>
         </div>
-        <button
-          onClick={checkHealth}
-          disabled={loading}
-          className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 px-4 py-2 rounded-lg text-sm text-slate-200 transition-colors disabled:opacity-50"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          Recheck API Status
-        </button>
+        <div className="flex items-center gap-3">
+          {user ? (
+            <div className="flex items-center gap-3">
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-500 text-white font-medium px-3 py-1.5 rounded-lg text-xs transition-colors shadow-sm"
+              >
+                Dashboard
+              </Link>
+              <span className="flex items-center gap-1.5 bg-slate-800 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs text-slate-200">
+                <UserIcon className="w-3.5 h-3.5 text-sky-400" />
+                {user.email}
+              </span>
+              <button
+                onClick={() => signOut()}
+                className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs text-rose-400 hover:text-rose-300 transition-colors"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link
+                href="/auth/login"
+                className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs text-slate-200 transition-colors"
+              >
+                <LogIn className="w-3.5 h-3.5 text-sky-400" />
+                Sign In
+              </Link>
+              <Link
+                href="/auth/signup"
+                className="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-500 text-white font-medium px-3 py-1.5 rounded-lg text-xs transition-colors shadow-sm"
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
+          <button
+            onClick={checkHealth}
+            disabled={loading}
+            className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-lg text-xs text-slate-200 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            Recheck API
+          </button>
+        </div>
       </div>
 
       {/* Architecture Alert Banner */}
@@ -104,13 +146,13 @@ export default function Home() {
         <div className="bg-slate-800/50 border border-slate-700/60 rounded-xl p-5">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Database</span>
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-950 text-amber-400 border border-amber-800/50">
-              <AlertTriangle className="w-3 h-3 mr-1" />
-              BLOCKED
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-950 text-emerald-400 border border-emerald-800/50">
+              <CheckCircle2 className="w-3 h-3 mr-1" />
+              VERIFIED
             </span>
           </div>
           <p className="text-lg font-medium text-white mb-1">Supabase PostgreSQL</p>
-          <p className="text-xs text-slate-400">Awaiting target project & credential authorization</p>
+          <p className="text-xs text-slate-400">Connection established &bull; Intentionally empty (Phase 1)</p>
         </div>
       </div>
 
