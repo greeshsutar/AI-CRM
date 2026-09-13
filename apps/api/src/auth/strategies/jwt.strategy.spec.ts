@@ -9,7 +9,10 @@ describe('JwtStrategy', () => {
 
   beforeEach(() => {
     mockConfigService = {
-      get: vi.fn().mockReturnValue('test-secret'),
+      get: vi.fn((key: string, defaultValue: string) => {
+        if (key === 'app.supabaseUrl') return 'https://test-supabase.supabase.co';
+        return defaultValue;
+      }),
     } as unknown as ConfigService;
 
     strategy = new JwtStrategy(mockConfigService);
