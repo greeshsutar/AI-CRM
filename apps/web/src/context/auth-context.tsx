@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
 
@@ -19,10 +19,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-
-  const supabase = createClient();
+  const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
 
   useEffect(() => {
+    // createBrowserClient must only be called in the browser, never during
+    // Next.js static prerendering (where env vars may not exist in CI).
+    const supabase = (supabaseRef.current ??= createClient());
+
     const getInitialSession = async () => {
       try {
         const {
@@ -54,7 +57,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
+    const supabase = supabaseRef.current;
+    if (!supabase) return;
+
     setLoading(true);
     try {
       await supabase.auth.signOut();
@@ -66,7 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   return (
     <AuthContext.Provider
@@ -90,3 +96,4 @@ export function useAuth() {
   }
   return context;
 }
+
