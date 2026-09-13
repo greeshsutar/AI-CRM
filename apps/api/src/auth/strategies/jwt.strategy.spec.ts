@@ -23,7 +23,7 @@ describe('JwtStrategy', () => {
   });
 
   describe('validate', () => {
-    it('should validate and return authenticated user payload', async () => {
+    it('should validate and return authenticated user payload with default aal1 when aal claim is missing', async () => {
       const payload = {
         sub: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
         email: 'user@example.com',
@@ -34,6 +34,23 @@ describe('JwtStrategy', () => {
       expect(result).toEqual({
         userId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
         email: 'user@example.com',
+        aal: 'aal1',
+      });
+    });
+
+    it('should return aal2 when aal claim is aal2', async () => {
+      const payload = {
+        sub: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+        email: 'user@example.com',
+        aal: 'aal2',
+      };
+
+      const result = await strategy.validate(payload);
+
+      expect(result).toEqual({
+        userId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+        email: 'user@example.com',
+        aal: 'aal2',
       });
     });
 

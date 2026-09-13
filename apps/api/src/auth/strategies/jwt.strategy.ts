@@ -11,11 +11,13 @@ export interface JwtPayload {
   role?: string;
   exp?: number;
   iat?: number;
+  aal?: string;
 }
 
 export interface AuthenticatedUser {
   userId: string;
   email: string;
+  aal?: 'aal1' | 'aal2';
 }
 
 @Injectable()
@@ -49,6 +51,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     return {
       userId: payload.sub,
       email: payload.email,
+      aal: payload.aal === 'aal2' ? 'aal2' : 'aal1',
     };
   }
 }

@@ -6,6 +6,7 @@ import { UsersModule } from './users';
 import { AuthModule } from './auth';
 import { OrganizationsModule } from './organizations/organizations.module';
 import { MembershipsModule } from './memberships/memberships.module';
+import { SuperAdminModule } from './super-admin/super-admin.module';
 import { appConfig } from './config/app.config';
 
 @Module({
@@ -21,6 +22,7 @@ import { appConfig } from './config/app.config';
     AuthModule,
     OrganizationsModule,
     MembershipsModule,
+    SuperAdminModule,
   ],
 })
 export class AppModule {}

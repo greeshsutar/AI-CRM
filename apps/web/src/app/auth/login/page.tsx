@@ -28,7 +28,19 @@ export default function LoginPage() {
       if (authError) {
         setError(authError.message);
       } else {
-        router.push('/');
+        // Check MFA authenticator assurance level
+        const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (aalData && aalData.nextLevel === 'aal2' && aalData.currentLevel !== 'aal2') {
+          const { data: factorsData } = await supabase.auth.mfa.listFactors();
+          const hasVerifiedTotp = factorsData?.totp?.some((f) => f.status === 'verified');
+          if (hasVerifiedTotp) {
+            router.push('/auth/mfa/verify');
+          } else {
+            router.push('/auth/mfa/setup');
+          }
+        } else {
+          router.push('/');
+        }
         router.refresh();
       }
     } catch (err) {
