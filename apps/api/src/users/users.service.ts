@@ -1,6 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../database';
 import { User } from '@prisma/client';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
 
 export interface SupabaseUserPayload {
   id: string;
@@ -14,7 +15,10 @@ export interface SupabaseUserPayload {
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditLogsService: AuditLogsService,
+  ) {}
 
   /**
    * Find user by ID or create user record using the Supabase Auth UUID.
@@ -31,7 +35,7 @@ export class UsersService {
 
     this.logger.log(`Creating application user profile for Supabase ID: ${supaUser.id}`);
 
-    return this.prisma.user.create({
+    const newUser = await this.prisma.user.create({
       data: {
         id: supaUser.id,
         email: supaUser.email,
@@ -41,6 +45,15 @@ export class UsersService {
         isActive: true,
       },
     });
+
+    await this.auditLogsService.log({
+      actorId: newUser.id,
+      action: 'user.created',
+      targetResource: `user:${newUser.id}`,
+      metadata: { email: newUser.email },
+    });
+
+    return newUser;
   }
 
   /**

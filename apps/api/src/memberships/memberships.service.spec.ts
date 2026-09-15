@@ -26,6 +26,10 @@ describe('MembershipsService', () => {
   const validOrgId = 'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22';
   const requesterId = 'c2eebc99-9c0b-4ef8-bb6d-6bb9bd380a33';
 
+  let mockAuditLogsService: {
+    log: ReturnType<typeof vi.fn>;
+  };
+
   beforeEach(() => {
     mockPrisma = {
       user: {
@@ -43,7 +47,14 @@ describe('MembershipsService', () => {
       },
     };
 
-    service = new MembershipsService(mockPrisma as unknown as PrismaService);
+    mockAuditLogsService = {
+      log: vi.fn().mockResolvedValue({}),
+    };
+
+    service = new MembershipsService(
+      mockPrisma as unknown as PrismaService,
+      mockAuditLogsService as any,
+    );
   });
 
   it('should throw NotFoundException if target user does not exist', async () => {

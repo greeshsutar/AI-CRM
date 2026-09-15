@@ -14,12 +14,30 @@ import { CurrentUser } from '../common';
 import { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
 import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
+import { OnboardOrganizationDto } from './dto/onboard-organization.dto';
 
 @ApiTags('Organizations')
 @ApiBearerAuth()
 @Controller('organizations')
 export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) {}
+
+  @Post('onboard')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Onboard Organization Owner',
+    description: 'Onboards a new organization owner with company profile, establishing CUSTOMER_ADMIN membership in a transaction.',
+  })
+  @ApiResponse({ status: 201, description: 'Organization and admin membership onboarded successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid payload' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async onboard(
+    @Body() dto: OnboardOrganizationDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.organizationsService.onboard(dto, user);
+  }
 
   @Post()
   @Version('1')
@@ -29,8 +47,11 @@ export class OrganizationsController {
   @ApiResponse({ status: 400, description: 'Validation failed' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 409, description: 'Organization slug conflict' })
-  async create(@Body() dto: CreateOrganizationDto) {
-    return this.organizationsService.create(dto);
+  async create(
+    @Body() dto: CreateOrganizationDto,
+    @CurrentUser() user?: AuthenticatedUser,
+  ) {
+    return this.organizationsService.create(dto, user?.userId);
   }
 
   @Get()

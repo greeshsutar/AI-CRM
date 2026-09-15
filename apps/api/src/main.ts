@@ -47,6 +47,17 @@ async function bootstrap() {
     .setTitle('MINSTOCS CRM API')
     .setDescription('MINSTOCS CRM — NestJS API Foundation')
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter Supabase Auth JWT access token',
+        in: 'header',
+      },
+      'bearer',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);

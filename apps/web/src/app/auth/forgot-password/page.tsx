@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
+import { useAuth } from '@/context/auth-context';
 import { ShieldCheck, KeyRound, AlertCircle, CheckCircle2, Loader2, ArrowLeft } from 'lucide-react';
 
 export default function ForgotPasswordPage() {
+  const { resetPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,17 +19,9 @@ export default function ForgotPasswordPage() {
     setSuccess(false);
 
     try {
-      const supabase = createClient();
       const origin = typeof window !== 'undefined' ? window.location.origin : '';
-      const { error: authError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${origin}/auth/login`,
-      });
-
-      if (authError) {
-        setError(authError.message);
-      } else {
-        setSuccess(true);
-      }
+      await resetPassword(email, `${origin}/auth/login`);
+      setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');
     } finally {

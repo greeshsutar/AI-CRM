@@ -3,6 +3,8 @@ import { NotFoundException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { PrismaService } from '../database';
 
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
+
 describe('UsersService', () => {
   let service: UsersService;
   let mockPrisma: {
@@ -24,6 +26,10 @@ describe('UsersService', () => {
     updatedAt: new Date(),
   };
 
+  let mockAuditLogsService: {
+    log: ReturnType<typeof vi.fn>;
+  };
+
   beforeEach(() => {
     mockPrisma = {
       user: {
@@ -33,7 +39,14 @@ describe('UsersService', () => {
       },
     };
 
-    service = new UsersService(mockPrisma as unknown as PrismaService);
+    mockAuditLogsService = {
+      log: vi.fn().mockResolvedValue({}),
+    };
+
+    service = new UsersService(
+      mockPrisma as unknown as PrismaService,
+      mockAuditLogsService as unknown as AuditLogsService,
+    );
   });
 
   it('should be defined', () => {

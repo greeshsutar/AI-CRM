@@ -1,8 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { passportJwtSecret } from 'jwks-rsa';
+import { AuthService } from '../auth.service';
 
 export interface JwtPayload {
   sub: string;
@@ -22,30 +23,44 @@ export interface AuthenticatedUser {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(configService: ConfigService) {
+  constructor(
+    configService: ConfigService,
+    @Optional() private readonly authService?: AuthService,
+  ) {
+    const supabaseJwtSecret = configService.get<string>('SUPABASE_JWT_SECRET');
     const supabaseUrl = configService.get<string>(
       'app.supabaseUrl',
       'https://nbtcahwwwvttrgrmeiac.supabase.co',
     );
 
     const jwksUri = `${supabaseUrl.replace(/\/$/, '')}/auth/v1/.well-known/jwks.json`;
+    const jwksSecret = passportJwtSecret({
+      cache: true,
+      rateLimit: true,
+      jwksRequestsPerMinute: 5,
+      jwksUri,
+    });
 
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      algorithms: ['ES256', 'RS256'],
-      secretOrKeyProvider: passportJwtSecret({
-        cache: true,
-        rateLimit: true,
-        jwksRequestsPerMinute: 5,
-        jwksUri,
-      }),
+      algorithms: ['HS256', 'ES256', 'RS256'],
+      secretOrKeyProvider: (request, rawJwtToken, done) => {
+        if (supabaseJwtSecret) {
+          return done(null, supabaseJwtSecret);
+        }
+        return jwksSecret(request, rawJwtToken, done);
+      },
     });
   }
 
   async validate(payload: JwtPayload): Promise<AuthenticatedUser> {
     if (!payload || !payload.sub) {
       throw new UnauthorizedException('Invalid token payload: missing sub claim');
+    }
+
+    if (this.authService) {
+      return this.authService.validateUserPayload(payload);
     }
 
     return {

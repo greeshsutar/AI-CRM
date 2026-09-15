@@ -3,11 +3,14 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/auth-context';
 import { createClient } from '@/lib/supabase/client';
+import { ensureOnboarding } from '@/lib/api-client';
 import { ShieldCheck, LogIn, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,30 +22,32 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const supabase = createClient();
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const authResult = await login(email, password);
+      const session = authResult.session;
 
-      if (authError) {
-        setError(authError.message);
-      } else {
-        // Check MFA authenticator assurance level
-        const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-        if (aalData && aalData.nextLevel === 'aal2' && aalData.currentLevel !== 'aal2') {
-          const { data: factorsData } = await supabase.auth.mfa.listFactors();
-          const hasVerifiedTotp = factorsData?.totp?.some((f) => f.status === 'verified');
-          if (hasVerifiedTotp) {
-            router.push('/auth/mfa/verify');
-          } else {
-            router.push('/auth/mfa/setup');
-          }
-        } else {
-          router.push('/');
+      if (session?.access_token && session?.user) {
+        try {
+          await ensureOnboarding(session.access_token, session.user);
+        } catch (onboardErr) {
+          console.warn('Login onboarding check warning:', onboardErr);
         }
-        router.refresh();
       }
+
+      // Check MFA authenticator assurance level
+      const supabase = createClient();
+      const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aalData && aalData.nextLevel === 'aal2' && aalData.currentLevel !== 'aal2') {
+        const { data: factorsData } = await supabase.auth.mfa.listFactors();
+        const hasVerifiedTotp = factorsData?.totp?.some((f) => f.status === 'verified');
+        if (hasVerifiedTotp) {
+          router.push('/auth/mfa/verify');
+        } else {
+          router.push('/auth/mfa/setup');
+        }
+      } else {
+        router.push('/');
+      }
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');
     } finally {

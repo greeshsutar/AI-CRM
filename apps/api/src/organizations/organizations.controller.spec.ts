@@ -5,6 +5,7 @@ import { OrganizationsService } from './organizations.service';
 describe('OrganizationsController', () => {
   let controller: OrganizationsController;
   let mockService: {
+    onboard: ReturnType<typeof vi.fn>;
     create: ReturnType<typeof vi.fn>;
     findAllForUser: ReturnType<typeof vi.fn>;
     findByIdForUser: ReturnType<typeof vi.fn>;
@@ -12,6 +13,7 @@ describe('OrganizationsController', () => {
 
   beforeEach(() => {
     mockService = {
+      onboard: vi.fn(),
       create: vi.fn(),
       findAllForUser: vi.fn(),
       findByIdForUser: vi.fn(),
@@ -22,6 +24,17 @@ describe('OrganizationsController', () => {
     );
   });
 
+  it('should call service.onboard on POST /organizations/onboard', async () => {
+    const dto = { companyName: 'Acme', numberOfUsers: 10, phone: '+123456' };
+    const user = { userId: 'user-1', email: 'user@example.com' };
+    const expected = { organization: { id: 'org-1', name: 'Acme' }, membership: { id: 'mem-1', role: 'CUSTOMER_ADMIN' } };
+    mockService.onboard.mockResolvedValue(expected);
+
+    const result = await controller.onboard(dto, user);
+    expect(result).toEqual(expected);
+    expect(mockService.onboard).toHaveBeenCalledWith(dto, user);
+  });
+
   it('should call service.create on POST /organizations', async () => {
     const dto = { name: 'Acme', slug: 'acme' };
     const expected = { id: 'org-1', ...dto };
@@ -29,7 +42,7 @@ describe('OrganizationsController', () => {
 
     const result = await controller.create(dto);
     expect(result).toEqual(expected);
-    expect(mockService.create).toHaveBeenCalledWith(dto);
+    expect(mockService.create).toHaveBeenCalledWith(dto, undefined);
   });
 
   it('should call service.findAllForUser on GET /organizations', async () => {

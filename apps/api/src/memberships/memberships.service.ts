@@ -7,10 +7,14 @@ import {
 import { PrismaService } from '../database';
 import { CreateMembershipDto } from './dto/create-membership.dto';
 import { Membership, Role } from '@prisma/client';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
 
 @Injectable()
 export class MembershipsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditLogsService: AuditLogsService,
+  ) {}
 
   /**
    * Create a new Membership (V8: POST /memberships, permission: memberships.manage)
@@ -76,7 +80,7 @@ export class MembershipsService {
     }
 
     // 5. Create membership
-    return this.prisma.membership.create({
+    const createdMembership = await this.prisma.membership.create({
       data: {
         userId: dto.userId,
         organizationId: dto.organizationId,
@@ -88,6 +92,20 @@ export class MembershipsService {
         user: true,
       },
     });
+
+    await this.auditLogsService.log({
+      actorId: requesterUserId,
+      organizationId: createdMembership.organizationId,
+      action: 'membership.created',
+      targetResource: `membership:${createdMembership.id}`,
+      metadata: {
+        targetUserId: createdMembership.userId,
+        role: createdMembership.role,
+        status: createdMembership.status,
+      },
+    });
+
+    return createdMembership;
   }
 
   /**

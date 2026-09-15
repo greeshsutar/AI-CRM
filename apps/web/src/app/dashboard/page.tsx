@@ -20,6 +20,7 @@ import {
   ArrowLeft,
   Save,
   Key,
+  Users,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -144,6 +145,19 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <Link
+              href="/dashboard/employees"
+              className="flex items-center gap-1.5 bg-sky-950/60 hover:bg-sky-900/60 border border-sky-800/80 px-3 py-1.5 rounded-lg text-xs font-medium text-sky-300 transition-colors"
+            >
+              <Users className="w-3.5 h-3.5" />
+              Employees & Invitations
+            </Link>
+            <Link
+              href="/audit-logs"
+              className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-lg text-xs text-sky-400 transition-colors"
+            >
+              Audit Logs
+            </Link>
             <button
               onClick={() => accessToken && loadProfile(accessToken)}
               disabled={profileLoading}
