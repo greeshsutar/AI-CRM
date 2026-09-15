@@ -19,6 +19,7 @@ export interface AuthContextType {
   logout: () => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string, redirectTo?: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -166,6 +167,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [getSupabaseClient],
   );
 
+  const updatePassword = useCallback(
+    async (password: string) => {
+      const supabase = getSupabaseClient();
+      const { error } = await supabase.auth.updateUser({ password });
+
+      if (error) {
+        throw error;
+      }
+    },
+    [getSupabaseClient],
+  );
+
   return (
     <AuthContext.Provider
       value={{
@@ -178,6 +191,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         signOut: logout,
         resetPassword,
+        updatePassword,
       }}
     >
       {children}

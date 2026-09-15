@@ -266,9 +266,14 @@ Organization, Membership, RBAC, permissions, tenant isolation, teams, audit, set
 
 Current major phase:
 
-PHASE 01 — FOUNDATION
+PHASE 04 — TEAMS & RBAC
 
-Foundation includes the identity/organization/security foundation required by the rest of the CRM.
+Foundation includes the identity/organization/security foundation required by the rest of the CRM (currently complete up through Teams and RBAC).
+
+IMPORTANT AI RULE: 
+Phase 2 (Authentication) and Phase 3 are HISTORICAL AND COMPLETED.
+The original `13-PHASE-2-SPEC.md` and `14-PHASE-2-IMPLEMENTATION-PLAN.md` documents have been moved to `docs/archive/`. 
+DO NOT treat archived documents as active implementation instructions. Do not attempt to "re-implement" Authentication.
 
 Expected areas include:
 
@@ -581,11 +586,11 @@ Backend only.
 
 Current major phase:
 
-FOUNDATION
+PHASE 04 — TEAMS & RBAC
 
 Current focus:
 
-Identity / Organization / Authorization foundation.
+Teams, RBAC, and Audit Logging Foundation.
 
 Frontend implementation is intentionally postponed.
 

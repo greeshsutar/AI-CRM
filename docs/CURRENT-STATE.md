@@ -22,7 +22,9 @@ Frontend implementation is intentionally postponed until the Figma/UI design is 
 
 ## Current Major Phase
 
-PHASE 01 — FOUNDATION / PHASE 04 — TEAMS & RBAC
+PHASE 04 — TEAMS & RBAC
+
+(Note: Phases 1, 2, and 3 are historical and completed. Obsolete Phase 2 specification and implementation plan documents have been archived to prevent confusion.)
 
 ## Current Module
 
@@ -31,6 +33,11 @@ TEAMS & RBAC FOUNDATION (AUDIT LOGGING & TEAMS COMPLETE)
 ## Current Task
 
 Phase 4 Teams & RBAC Foundation implemented and verified.
+
+**CRITICAL PHASE BOUNDARY:**
+- The repository is currently at PHASE 04.
+- No Phase 5 (or subsequent phase) implementation is currently authorized.
+- CRM business functionality (e.g., Leads, Lead Generation, Contacts, Companies, Deals, Pipelines) MUST NOT be implemented until an approved authoritative Phase 5 specification exists in the `/docs` directory.
 
 ### Implemented Endpoints
 - `GET /api/v1/health`

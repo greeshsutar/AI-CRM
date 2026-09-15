@@ -20,7 +20,7 @@ export default function ForgotPasswordPage() {
 
     try {
       const origin = typeof window !== 'undefined' ? window.location.origin : '';
-      await resetPassword(email, `${origin}/auth/login`);
+      await resetPassword(email, `${origin}/auth/callback?next=/auth/reset-password`);
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');
